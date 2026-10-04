@@ -1,4 +1,4 @@
-# Báo cáo Lab Day 1 — MSSV 2A202602839
+# Báo cáo Lab Day 1 - Đỗ Mạnh Đoan - MSSV 2A202602839 
 
 ## 1. Thiết lập
 
