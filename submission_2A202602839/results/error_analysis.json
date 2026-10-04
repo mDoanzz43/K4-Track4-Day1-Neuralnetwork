@@ -1,0 +1,15 @@
+{
+  "hardest_class": 4,
+  "hardest_class_metrics": {
+    "cls": 4,
+    "support": 1899,
+    "precision": 0.8647178789938818,
+    "recall": 0.669826224328594,
+    "f1": 0.7548961424332343
+  },
+  "most_confused_with": 1,
+  "confusion_count": 538,
+  "baseline_eval_macro_f1": 0.8478867213595651,
+  "final_eval_macro_f1": 0.855695142591124,
+  "eval_improvement": 0.007808421231558893
+}

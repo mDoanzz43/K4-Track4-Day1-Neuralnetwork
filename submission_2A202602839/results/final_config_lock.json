@@ -1,0 +1,30 @@
+{
+  "selection_rule": "highest val macro-F1 among non-pathological 20-epoch candidates",
+  "selected_exp_id": "init-xavier",
+  "cfg": {
+    "exp_id": "init-xavier",
+    "group": "init",
+    "description": "Xavier versus He initialization",
+    "loss": "ce",
+    "optimizer": "sgd_momentum",
+    "lr": 0.1,
+    "weight_decay": 0.0,
+    "momentum": 0.9,
+    "batch": 512,
+    "epochs": 20,
+    "hidden": [
+      256,
+      128
+    ],
+    "dropout": 0.0,
+    "init": "xavier",
+    "clip_norm": null,
+    "precision": "fp32",
+    "seed": 1,
+    "train_eval_size": 50000,
+    "progress": true
+  },
+  "val_macro_f1": 0.8588351935612556,
+  "val_acc": 0.9064348873733353,
+  "locked_before_eval": true
+}
