@@ -1,4 +1,4 @@
-"""optimizer.py — PSEUDO-CODE. Bạn phải tự hoàn thiện mọi hàm có `raise NotImplementedError`.
+"""Xây dựng optimizer, scheduler và đo/cắt gradient nhất quán giữa các run.
 
 Được dùng torch.optim.* và torch.nn.utils.clip_grad_norm_ (xem README mục 5).
 File này gom việc chọn bộ tối ưu và cắt gradient để `train.py` gọn và mọi thí nghiệm công bằng.
@@ -28,7 +28,19 @@ def build_optimizer(name: str, params, lr: float, weight_decay: float = 0.0,
          "adamw"        -> torch.optim.AdamW(params, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay)
     Chú ý: weight_decay của Adam (L2 trộn vào gradient) khác weight_decay của AdamW (suy giảm tách riêng).
     """
-    raise NotImplementedError  # TODO
+    name = name.lower()
+    if name not in OPTIMIZERS:
+        raise ValueError(f"Optimizer phải thuộc {OPTIMIZERS}, nhận {name!r}.")
+    if lr <= 0:
+        raise ValueError("Learning rate phải dương.")
+    kwargs = dict(lr=lr, weight_decay=weight_decay)
+    if name == "sgd":
+        return torch.optim.SGD(params, **kwargs)
+    if name == "sgd_momentum":
+        return torch.optim.SGD(params, momentum=momentum, **kwargs)
+    if name == "adam":
+        return torch.optim.Adam(params, betas=betas, eps=eps, **kwargs)
+    return torch.optim.AdamW(params, betas=betas, eps=eps, **kwargs)
 
 
 def build_scheduler(optimizer, name: str | None, total_steps: int, **kwargs):
@@ -36,7 +48,17 @@ def build_scheduler(optimizer, name: str | None, total_steps: int, **kwargs):
 
     Trả về None nếu name là None. Nếu bạn dùng scheduler ở một thí nghiệm, hãy ghi vào bảng (cột notes).
     """
-    raise NotImplementedError  # TODO
+    if name is None or str(name).lower() in {"", "none"}:
+        return None
+    if total_steps <= 0:
+        raise ValueError("total_steps phải dương khi dùng scheduler.")
+    name = str(name).lower()
+    if name == "cosine":
+        eta_min = float(kwargs.get("eta_min", 0.0))
+        return torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=total_steps, eta_min=eta_min
+        )
+    raise ValueError(f"Scheduler chưa hỗ trợ: {name!r}.")
 
 
 def clip_gradients(params, max_norm: float | None) -> float:
@@ -49,4 +71,11 @@ def clip_gradients(params, max_norm: float | None) -> float:
     Giá trị trả về chính là `grad_norm` bạn phải ghi lại ở mỗi bước (để thấy "gai" gradient).
     Khi dùng mixed precision FP16 + GradScaler: phải scaler.unscale_(optimizer) TRƯỚC khi gọi hàm này.
     """
-    raise NotImplementedError  # TODO
+    parameters = [p for p in params if p.grad is not None]
+    if not parameters:
+        return 0.0
+    limit = float("inf") if max_norm is None else float(max_norm)
+    if limit <= 0:
+        raise ValueError("max_norm phải dương hoặc None.")
+    total_norm = torch.nn.utils.clip_grad_norm_(parameters, max_norm=limit)
+    return float(total_norm.detach().item())
